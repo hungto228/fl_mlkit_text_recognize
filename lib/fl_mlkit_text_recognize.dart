@@ -1,10 +1,15 @@
 import 'package:fl_camera/fl_camera.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 export 'package:fl_camera/fl_camera.dart';
 
 part 'src/method_call.dart';
+
+part 'src/mlkit_text_recognize.dart';
+
+part 'src/model.dart';
 
 const MethodChannel _flMlKitTextRecognizeChannel =
     MethodChannel(_flMlKitTextRecognize);

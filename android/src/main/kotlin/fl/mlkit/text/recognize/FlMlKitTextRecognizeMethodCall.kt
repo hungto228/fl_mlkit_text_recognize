@@ -2,9 +2,14 @@ package fl.mlkit.text.recognize
 
 import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
+import android.graphics.Point
+import android.graphics.Rect
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.Text
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.TextRecognizerOptions
 import fl.camera.FlCameraMethodCall
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -22,9 +27,6 @@ class FlMlKitTextRecognizeMethodCall(
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "startPreview" -> startPreview(imageAnalyzer, call, result)
-            "setBarcodeFormat" -> {
-                result.success(true)
-            }
             "scanImageByte" -> scanImageByte(call, result)
             "scan" -> {
                 val argument = call.arguments as Boolean
@@ -71,9 +73,55 @@ class FlMlKitTextRecognizeMethodCall(
         result: MethodChannel.Result?,
         imageProxy: ImageProxy?
     ) {
-        val barcodeList: ArrayList<Map<String, Any?>> = ArrayList()
+
+        val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+        recognizer.process(inputImage)
+            .addOnSuccessListener { visionText ->
+                if (result == null) {
+                    flCameraEvent?.sendEvent(visionText.data)
+                } else {
+                    result.success(visionText.data)
+                }
+            }
+            .addOnFailureListener { result?.success(null) }
+            .addOnCompleteListener { imageProxy?.close() }
 
     }
 
+    private val Text.data: Map<String, Any?>
+        get() = mapOf(
+            "text" to text,
+            "textBlocks" to textBlocks.map { corner -> corner.data }
+        )
 
+    private val Text.TextBlock.data: Map<String, Any?>
+        get() = mapOf(
+            "text" to text,
+            "recognizedLanguage" to recognizedLanguage,
+            "boundingBox" to boundingBox?.data,
+            "corners" to cornerPoints?.map { corner -> corner.data },
+            "lines" to lines.map { corner -> corner.data },
+        )
+    private val Text.Element.data: Map<String, Any?>
+        get() = mapOf(
+            "text" to text,
+            "recognizedLanguage" to recognizedLanguage,
+            "boundingBox" to boundingBox,
+            "corners" to cornerPoints?.map { corner -> corner.data },
+            "recognizedLanguage" to recognizedLanguage,
+        )
+    private val Text.Line.data: Map<String, Any?>
+        get() = mapOf(
+            "text" to text,
+            "recognizedLanguage" to recognizedLanguage,
+            "boundingBox" to boundingBox,
+            "corners" to cornerPoints?.map { corner -> corner.data },
+            "elements" to elements.map { corner -> corner.data },
+        )
+
+    private val Rect.data: Map<String, Int>
+        get() = mapOf("top" to top, "bottom" to bottom, "left" to left, "right" to right)
+
+    private val Point.data: Map<String, Double>
+        get() = mapOf("x" to x.toDouble(), "y" to y.toDouble())
 }

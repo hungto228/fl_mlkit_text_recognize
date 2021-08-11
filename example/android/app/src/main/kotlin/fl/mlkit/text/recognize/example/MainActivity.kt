@@ -1,6 +1,6 @@
-package fl.mlkit.text.recognize.fl_mlkit_text_recognize_example
+package fl.mlkit.text.recognize.example
 
 import io.flutter.embedding.android.FlutterActivity
 
-class MainActivity: FlutterActivity() {
+class MainActivity : FlutterActivity() {
 }
