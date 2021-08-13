@@ -10,18 +10,8 @@ class FlMlKitTextRecognize extends StatefulWidget {
     this.uninitialized,
     this.onFlashChange,
     this.isFullScreen = true,
-    this.useBackCamera = true,
-    this.zoomQuality = ZoomQuality.low,
     this.autoScanning = true,
   }) : super(key: key);
-
-  /// 是否使用后置摄像头
-  /// Using the back camera
-  final bool useBackCamera;
-
-  /// 相机预览缩放质量
-  /// Camera preview zoom quality
-  final ZoomQuality zoomQuality;
 
   /// 识别回调
   /// Identify callback
