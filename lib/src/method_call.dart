@@ -17,10 +17,42 @@ class FlMlKitTextRecognizeMethodCall {
 
   MethodChannel get channel => _channel;
 
+// 识别图片字节
+  /// Identify picture bytes
+  /// [useEvent] 返回消息使用 FLCameraEvent
+  /// The return message uses flcameraevent
+  /// [rotationDegrees] Only Android is supported
+  Future<AnalysisTextModel?> scanImageByte(Uint8List uint8list,
+      {int rotationDegrees = 0, bool useEvent = false}) async {
+    if (!_supportPlatform) return null;
+    if (useEvent) {
+      assert(
+          FlCameraEvent.instance.isPaused, 'Please initialize FLCameraEvent');
+    }
+    final dynamic map = await _channel.invokeMethod<dynamic>(
+        'scanImageByte', <String, dynamic>{
+      'byte': uint8list,
+      'useEvent': useEvent,
+      'rotationDegrees': rotationDegrees
+    });
+    if (map != null && map is Map) return AnalysisTextModel.fromMap(map);
+    return null;
+  }
+
   /// 打开\关闭 闪光灯
   /// Turn flash on / off
   Future<bool> setFlashMode(bool status) =>
       FlCameraMethodCall.instance.setFlashMode(status);
+
+  /// 相机缩放
+  /// Camera zoom
+  Future<bool> setZoomRatio(double ratio) =>
+      FlCameraMethodCall.instance.setZoomRatio(ratio);
+
+  /// 获取可用摄像头
+  /// get available Cameras
+  Future<List<CameraInfo>?> availableCameras() =>
+      FlCameraMethodCall.instance.availableCameras();
 
   /// 暂停扫描
   /// Pause scanning

@@ -19,7 +19,7 @@ class FlMlKitTextRecognizePlugin : FlutterPlugin, ActivityAware {
 
 
     override fun onAttachedToActivity(pluginBinding: ActivityPluginBinding) {
-        channel.setMethodCallHandler(FlMlKitTextRecognizeMethodCall(pluginBinding, plugin!!))
+        channel.setMethodCallHandler(FlMlKitTextRecognizeMethodCall(pluginBinding.activity, plugin!!))
     }
 
     override fun onDetachedFromActivityForConfigChanges() {

@@ -1,6 +1,6 @@
 part of '../fl_mlkit_text_recognize.dart';
 
-typedef EventBarcodeListen = void Function(dynamic barcodes);
+typedef EventBarcodeListen = void Function(AnalysisTextModel text);
 
 class FlMlKitTextRecognize extends StatefulWidget {
   FlMlKitTextRecognize({
@@ -9,8 +9,12 @@ class FlMlKitTextRecognize extends StatefulWidget {
     this.overlay,
     this.uninitialized,
     this.onFlashChange,
-    this.isFullScreen = true,
+    this.isFullScreen = false,
     this.autoScanning = true,
+    this.onZoomChange,
+    this.camera,
+    this.resolution = CameraResolution.high,
+    this.updateReset = false,
   }) : super(key: key);
 
   /// 识别回调
@@ -28,13 +32,29 @@ class FlMlKitTextRecognize extends StatefulWidget {
   /// Flash change
   final ValueChanged<FlashState>? onFlashChange;
 
+  /// 缩放变化
+  /// zoom ratio
+  final ValueChanged<CameraZoomState>? onZoomChange;
+
   /// 是否全屏
   /// Full screen
   final bool isFullScreen;
 
+  /// 更新组件时是否重置相机
+  /// Reset camera when updating components
+  final bool updateReset;
+
   /// 是否自动扫描 默认为[true]
   /// Auto scan defaults to [true]
   final bool autoScanning;
+
+  /// 需要预览的相机
+  /// Camera ID to preview
+  final CameraInfo? camera;
+
+  /// 预览相机支持的分辨率
+  /// Preview the resolution supported by the camera
+  final CameraResolution resolution;
 
   @override
   _FlMlKitTextRecognizeState createState() => _FlMlKitTextRecognizeState();
@@ -56,18 +76,28 @@ class _FlMlKitTextRecognizeState extends FlCameraState<FlMlKitTextRecognize> {
     await initEvent(eventListen);
 
     /// Initialize camera
-    if (await initCamera()) {
+    initCamera(camera: widget.camera, resolution: widget.resolution)
+        .then((bool value) {
+      if (!value) return;
       setState(() {});
 
       /// Start scan
       if (widget.autoScanning) FlMlKitTextRecognizeMethodCall.instance.start();
-    }
+    });
   }
 
   void eventListen(dynamic data) {
     if (widget.onListen != null) {
-      widget.onListen!(data);
+      if (data is Map) {
+        widget.onListen!(AnalysisTextModel.fromMap(data));
+      }
     }
+  }
+
+  @override
+  void onZoomChange(CameraZoomState state) {
+    super.onZoomChange(state);
+    if (widget.onZoomChange != null) widget.onZoomChange!(state);
   }
 
   @override
@@ -85,9 +115,10 @@ class _FlMlKitTextRecognizeState extends FlCameraState<FlMlKitTextRecognize> {
         oldWidget.autoScanning != widget.autoScanning ||
         oldWidget.isFullScreen != widget.isFullScreen ||
         oldWidget.onListen != widget.onListen) {
-      cameraMethodCall.dispose().then((bool value) {
-        if (value) init();
-      });
+      if (widget.updateReset)
+        cameraMethodCall.dispose().then((bool value) {
+          if (value) init();
+        });
     }
   }
 

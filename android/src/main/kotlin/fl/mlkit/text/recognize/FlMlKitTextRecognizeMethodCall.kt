@@ -1,6 +1,7 @@
 package fl.mlkit.text.recognize
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.graphics.Rect
@@ -9,18 +10,17 @@ import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.TextRecognizerOptions
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import fl.camera.FlCameraMethodCall
 import io.flutter.embedding.engine.plugins.FlutterPlugin
-import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
 class FlMlKitTextRecognizeMethodCall(
-    activityPlugin: ActivityPluginBinding,
+    activity: Activity,
     plugin: FlutterPlugin.FlutterPluginBinding
 ) :
-    FlCameraMethodCall(activityPlugin, plugin) {
+    FlCameraMethodCall(activity, plugin) {
 
     private var scan = false
 
@@ -73,14 +73,24 @@ class FlMlKitTextRecognizeMethodCall(
         result: MethodChannel.Result?,
         imageProxy: ImageProxy?
     ) {
-
         val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
         recognizer.process(inputImage)
             .addOnSuccessListener { visionText ->
+                var width = inputImage.width
+                var height = inputImage.height
+                if (width > height) {
+                    width -= height
+                    height += width
+                    width = height - width
+                }
+                val map: MutableMap<String, Any?> = HashMap()
+                map.putAll(visionText.data)
+                map["width"] = width
+                map["height"] = height
                 if (result == null) {
-                    flCameraEvent?.sendEvent(visionText.data)
+                    flCameraEvent?.sendEvent(map)
                 } else {
-                    result.success(visionText.data)
+                    result.success(map)
                 }
             }
             .addOnFailureListener { result?.success(null) }
@@ -108,7 +118,6 @@ class FlMlKitTextRecognizeMethodCall(
             "recognizedLanguage" to recognizedLanguage,
             "boundingBox" to boundingBox,
             "corners" to cornerPoints?.map { corner -> corner.data },
-            "recognizedLanguage" to recognizedLanguage,
         )
     private val Text.Line.data: Map<String, Any?>
         get() = mapOf(

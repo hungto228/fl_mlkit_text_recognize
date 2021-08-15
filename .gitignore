@@ -4,4 +4,8 @@
 .packages
 .pub/
 
+.idea/
+
+*.lock
+
 build/
