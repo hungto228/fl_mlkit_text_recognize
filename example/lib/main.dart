@@ -17,21 +17,28 @@ class _App extends StatefulWidget {
 }
 
 class _AppState extends State<_App> {
-  AnalysisTextModel? model;
-
   @override
   Widget build(BuildContext context) {
     return ExtendedScaffold(
-        appBar: AppBarText('Fl MlKit Scanning'),
+        appBar: AppBarText('Fl MlKit Text Recognize'),
         mainAxisAlignment: MainAxisAlignment.center,
         padding: const EdgeInsets.all(30),
         children: <Widget>[
           const SizedBox(height: 10),
           ElevatedText(onPressed: scanImage, text: 'Image recognition'),
           const SizedBox(height: 10),
-          ElevatedText(onPressed: openCamera, text: 'Camera identification'),
+          ElevatedText(
+              onPressed: () => openCamera(RecognizedLanguage.latin),
+              text: 'Camera recognition Latin'),
+          const SizedBox(height: 10),
+          ElevatedText(
+              onPressed: () => openCamera(RecognizedLanguage.chinese),
+              text: 'Camera recognition Chinese'),
+          const SizedBox(height: 10),
+          ElevatedText(
+              onPressed: () => openCamera(RecognizedLanguage.japanese),
+              text: 'Camera recognition Japanese'),
           const SizedBox(height: 30),
-          ShowCode(model)
         ]);
   }
 
@@ -45,17 +52,12 @@ class _AppState extends State<_App> {
     if (permission) push(CameraScanPage());
   }
 
-  Future<void> openCamera() async {
+  Future<void> openCamera(RecognizedLanguage recognizedLanguage) async {
     bool hasPermission = false;
     if (isAndroid) hasPermission = await getPermission(Permission.camera);
     if (isIOS) hasPermission = true;
-    if (hasPermission) {
-      final AnalysisTextModel? data = await push(FlMlKitTextRecognizePage());
-      if (data != null) {
-        model = data;
-        setState(() {});
-      }
-    }
+    if (hasPermission)
+      push(FlMlKitTextRecognizePage(recognizedLanguage: recognizedLanguage));
   }
 }
 
@@ -67,7 +69,17 @@ class ShowCode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Universal(expanded: expanded, isScroll: expanded, children: []);
+    return Universal(expanded: expanded, isScroll: expanded, children: <Widget>[
+      ShowText('height=', model?.height),
+      ShowText('width=', model?.width),
+      ShowText('value=', model?.text),
+      const Divider(),
+      ...model?.textBlocks
+              ?.map((TextBlock b) => SizedBox(
+                  width: double.infinity, child: ShowText('TextBlock', b.text)))
+              .toList() ??
+          <Widget>[]
+    ]);
   }
 }
 
@@ -92,9 +104,19 @@ class ShowText extends StatelessWidget {
         visible: value != null &&
             value.toString().isNotEmpty &&
             value.toString() != 'null',
-        child: Container(
-            margin: const EdgeInsets.all(10),
-            child: Text(keyName.toString() + ' = ' + value.toString())));
+        child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: RText(textAlign: TextAlign.start, texts: <String>[
+              '$keyName: ',
+              value.toString()
+            ], styles: const <TextStyle>[
+              TextStyle(
+                  color: Colors.blue,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  height: 1.3),
+              TextStyle(color: Colors.black, height: 1.3),
+            ])));
   }
 }
 

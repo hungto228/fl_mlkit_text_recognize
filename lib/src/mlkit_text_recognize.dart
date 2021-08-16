@@ -3,18 +3,19 @@ part of '../fl_mlkit_text_recognize.dart';
 typedef EventBarcodeListen = void Function(AnalysisTextModel text);
 
 class FlMlKitTextRecognize extends StatefulWidget {
-  FlMlKitTextRecognize({
+  const FlMlKitTextRecognize({
     Key? key,
     this.onListen,
     this.overlay,
     this.uninitialized,
     this.onFlashChange,
-    this.isFullScreen = false,
     this.autoScanning = true,
     this.onZoomChange,
     this.camera,
     this.resolution = CameraResolution.high,
     this.updateReset = false,
+    this.fit = BoxFit.fitWidth,
+    this.recognizedLanguage = RecognizedLanguage.latin,
   }) : super(key: key);
 
   /// 识别回调
@@ -36,10 +37,6 @@ class FlMlKitTextRecognize extends StatefulWidget {
   /// zoom ratio
   final ValueChanged<CameraZoomState>? onZoomChange;
 
-  /// 是否全屏
-  /// Full screen
-  final bool isFullScreen;
-
   /// 更新组件时是否重置相机
   /// Reset camera when updating components
   final bool updateReset;
@@ -56,6 +53,13 @@ class FlMlKitTextRecognize extends StatefulWidget {
   /// Preview the resolution supported by the camera
   final CameraResolution resolution;
 
+  /// canera fit
+  final BoxFit fit;
+
+  /// 需要是别的语言类型
+  /// Language to be recognized
+  final RecognizedLanguage recognizedLanguage;
+
   @override
   _FlMlKitTextRecognizeState createState() => _FlMlKitTextRecognizeState();
 }
@@ -69,11 +73,14 @@ class _FlMlKitTextRecognizeState extends FlCameraState<FlMlKitTextRecognize> {
   }
 
   Future<void> init() async {
-    fullScreen = widget.isFullScreen;
+    boxFit = widget.fit;
     uninitialized = widget.uninitialized;
 
     /// Add message callback
     await initEvent(eventListen);
+
+    await FlMlKitTextRecognizeMethodCall.instance
+        .setRecognizedLanguage(widget.recognizedLanguage);
 
     /// Initialize camera
     initCamera(camera: widget.camera, resolution: widget.resolution)
@@ -113,7 +120,7 @@ class _FlMlKitTextRecognizeState extends FlCameraState<FlMlKitTextRecognize> {
         oldWidget.onFlashChange != widget.onFlashChange ||
         oldWidget.uninitialized != widget.uninitialized ||
         oldWidget.autoScanning != widget.autoScanning ||
-        oldWidget.isFullScreen != widget.isFullScreen ||
+        oldWidget.fit != widget.fit ||
         oldWidget.onListen != widget.onListen) {
       if (widget.updateReset)
         cameraMethodCall.dispose().then((bool value) {
@@ -140,5 +147,11 @@ class _FlMlKitTextRecognizeState extends FlCameraState<FlMlKitTextRecognize> {
         SizedBox.expand(child: widget.overlay),
       ]);
     return camera;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    FlMlKitTextRecognizeMethodCall.instance.pause();
   }
 }

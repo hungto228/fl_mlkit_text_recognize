@@ -3,7 +3,7 @@ part of '../fl_mlkit_text_recognize.dart';
 class AnalysisTextModel {
   AnalysisTextModel.fromMap(Map<dynamic, dynamic> data)
       : text = data['text'] as String?,
-        textBlocks = _getTextBlocks(data['textBlocks']),
+        textBlocks = _getTextBlocks(data['textBlocks'] as List<dynamic>?),
         height = data['height'] as double?,
         width = data['width'] as double?;
 
@@ -24,9 +24,11 @@ class AnalysisTextModel {
 
 class TextBlock extends TextElement {
   TextBlock.fromMap(Map<dynamic, dynamic> data) {
-    lines = _getTextLines(data['lines']);
+    lines = _getTextLines(data['lines'] as List<dynamic>?);
     text = data['text'] as String?;
     recognizedLanguage = data['recognizedLanguage'] as String?;
+    recognizedLanguages =
+        _getRecognizedLanguages(data['recognizedLanguages'] as List<dynamic>?);
     boundingBox = _getRect(data['boundingBox'] as Map<dynamic, dynamic>?);
     corners = _getCorners(data['corners'] as List<dynamic>?);
   }
@@ -41,9 +43,11 @@ class TextBlock extends TextElement {
 
 class TextLine extends TextElement {
   TextLine.fromMap(Map<dynamic, dynamic> data) {
-    elements = _getTextElement(data['elements']);
+    elements = _getTextElement(data['elements'] as List<dynamic>?);
     text = data['text'] as String?;
     recognizedLanguage = data['recognizedLanguage'] as String?;
+    recognizedLanguages =
+        _getRecognizedLanguages(data['recognizedLanguages'] as List<dynamic>?);
     boundingBox = _getRect(data['boundingBox'] as Map<dynamic, dynamic>?);
     corners = _getCorners(data['corners'] as List<dynamic>?);
   }
@@ -64,17 +68,24 @@ class TextElement {
     this.corners,
   });
 
-  String? text;
-  String? recognizedLanguage;
-  Rect? boundingBox;
-  List<Offset>? corners;
-
   TextElement.fromMap(Map<dynamic, dynamic> data)
       : text = data['text'] as String?,
         recognizedLanguage = data['recognizedLanguage'] as String?,
+        recognizedLanguages = _getRecognizedLanguages(
+            data['recognizedLanguages'] as List<dynamic>?),
         boundingBox = _getRect(data['boundingBox'] as Map<dynamic, dynamic>?),
         corners = _getCorners(data['corners'] as List<dynamic>?);
+
+  String? text;
+  String? recognizedLanguage;
+  List<String>? recognizedLanguages;
+  Rect? boundingBox;
+  List<Offset>? corners;
 }
+
+List<String>? _getRecognizedLanguages(List<dynamic>? data) => data != null
+    ? List<String>.unmodifiable(data.map<dynamic>((dynamic e) => e as String))
+    : null;
 
 List<TextBlock>? _getTextBlocks(List<dynamic>? data) => data != null
     ? List<TextBlock>.unmodifiable(data.map<dynamic>(
@@ -82,11 +93,8 @@ List<TextBlock>? _getTextBlocks(List<dynamic>? data) => data != null
     : null;
 
 List<Offset>? _getCorners(List<dynamic>? data) => data != null
-    ? List<Offset>.unmodifiable(data.map<dynamic>((dynamic e) {
-        final double x = e['x'] as double? ?? 0;
-        final double y = e['y'] as double? ?? 0;
-        return Offset(x, y);
-      }))
+    ? List<Offset>.unmodifiable(data.map<dynamic>(
+        (dynamic e) => Offset(e['x'] as double? ?? 0, e['y'] as double? ?? 0)))
     : null;
 
 Rect? _getRect(Map<dynamic, dynamic>? data) {
@@ -101,12 +109,11 @@ Rect? _getRect(Map<dynamic, dynamic>? data) {
       return Rect.fromLTRB(
           left.toDouble(), top.toDouble(), right.toDouble(), bottom.toDouble());
     } else if (_isIOS) {
-      final int x = (data['x'] as int?) ?? 0;
-      final int y = (data['y'] as int?) ?? 0;
-      final int width = (data['width'] as int?) ?? 0;
-      final int height = (data['height'] as int?) ?? 0;
-      return Rect.fromLTWH(
-          x.toDouble(), y.toDouble(), width.toDouble(), height.toDouble());
+      final double x = (data['x'] as double?) ?? 0;
+      final double y = (data['y'] as double?) ?? 0;
+      final double width = (data['width'] as double?) ?? 0;
+      final double height = (data['height'] as double?) ?? 0;
+      return Rect.fromLTWH(x, y, width, height);
     }
   }
 }

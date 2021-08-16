@@ -10,6 +10,9 @@ import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.TextRecognizerOptionsInterface
+import com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions
+import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import fl.camera.FlCameraMethodCall
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -22,12 +25,19 @@ class FlMlKitTextRecognizeMethodCall(
 ) :
     FlCameraMethodCall(activity, plugin) {
 
+    private var options: TextRecognizerOptionsInterface = TextRecognizerOptions.DEFAULT_OPTIONS
+
     private var scan = false
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "startPreview" -> startPreview(imageAnalyzer, call, result)
             "scanImageByte" -> scanImageByte(call, result)
+            "getScanState" -> result.success(scan)
+            "setRecognizedLanguage" -> {
+                setRecognizedLanguage(call)
+                result.success(true)
+            }
             "scan" -> {
                 val argument = call.arguments as Boolean
                 if (argument != scan) {
@@ -38,6 +48,14 @@ class FlMlKitTextRecognizeMethodCall(
             else -> {
                 super.onMethodCall(call, result)
             }
+        }
+    }
+
+    private fun setRecognizedLanguage(call: MethodCall) {
+        when (call.arguments as String) {
+            "latin" -> options = TextRecognizerOptions.DEFAULT_OPTIONS
+            "chinese" -> options = ChineseTextRecognizerOptions.Builder().build()
+            "japanese" -> options = JapaneseTextRecognizerOptions.Builder().build()
         }
     }
 
@@ -73,7 +91,7 @@ class FlMlKitTextRecognizeMethodCall(
         result: MethodChannel.Result?,
         imageProxy: ImageProxy?
     ) {
-        val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+        val recognizer = TextRecognition.getClient(options)
         recognizer.process(inputImage)
             .addOnSuccessListener { visionText ->
                 var width = inputImage.width
@@ -85,8 +103,8 @@ class FlMlKitTextRecognizeMethodCall(
                 }
                 val map: MutableMap<String, Any?> = HashMap()
                 map.putAll(visionText.data)
-                map["width"] = width
-                map["height"] = height
+                map["width"] = width.toDouble()
+                map["height"] = height.toDouble()
                 if (result == null) {
                     flCameraEvent?.sendEvent(map)
                 } else {
@@ -98,10 +116,11 @@ class FlMlKitTextRecognizeMethodCall(
 
     }
 
+
     private val Text.data: Map<String, Any?>
         get() = mapOf(
             "text" to text,
-            "textBlocks" to textBlocks.map { corner -> corner.data }
+            "textBlocks" to textBlocks.map { textBlock -> textBlock.data }
         )
 
     private val Text.TextBlock.data: Map<String, Any?>
@@ -110,22 +129,22 @@ class FlMlKitTextRecognizeMethodCall(
             "recognizedLanguage" to recognizedLanguage,
             "boundingBox" to boundingBox?.data,
             "corners" to cornerPoints?.map { corner -> corner.data },
-            "lines" to lines.map { corner -> corner.data },
+            "lines" to lines.map { line -> line.data },
         )
     private val Text.Element.data: Map<String, Any?>
         get() = mapOf(
             "text" to text,
             "recognizedLanguage" to recognizedLanguage,
-            "boundingBox" to boundingBox,
+            "boundingBox" to boundingBox?.data,
             "corners" to cornerPoints?.map { corner -> corner.data },
         )
     private val Text.Line.data: Map<String, Any?>
         get() = mapOf(
             "text" to text,
             "recognizedLanguage" to recognizedLanguage,
-            "boundingBox" to boundingBox,
+            "boundingBox" to boundingBox?.data,
             "corners" to cornerPoints?.map { corner -> corner.data },
-            "elements" to elements.map { corner -> corner.data },
+            "elements" to elements.map { element -> element.data },
         )
 
     private val Rect.data: Map<String, Int>

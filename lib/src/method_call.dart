@@ -1,5 +1,20 @@
 part of '../fl_mlkit_text_recognize.dart';
 
+enum RecognizedLanguage {
+  /// Including English
+  /// A language of 26 letters
+  latin,
+
+  /// 中文
+  chinese,
+
+  /// 日语
+  japanese,
+
+  /// Include all above
+  // all,
+}
+
 class FlMlKitTextRecognizeMethodCall {
   factory FlMlKitTextRecognizeMethodCall() => _getInstance();
 
@@ -13,11 +28,24 @@ class FlMlKitTextRecognizeMethodCall {
     return _instance!;
   }
 
+  RecognizedLanguage _recognizedLanguage = RecognizedLanguage.latin;
+
   final MethodChannel _channel = _flMlKitTextRecognizeChannel;
 
   MethodChannel get channel => _channel;
 
-// 识别图片字节
+  /// 设置设别的语言
+  /// Set recognized language
+  Future<bool> setRecognizedLanguage(
+      RecognizedLanguage recognizedLanguage) async {
+    if (!_supportPlatform) return false;
+    _recognizedLanguage = recognizedLanguage;
+    final bool? state = await _channel.invokeMethod<bool?>(
+        'setRecognizedLanguage', _recognizedLanguage.toString().split('.')[1]);
+    return state ?? false;
+  }
+
+  /// 识别图片字节
   /// Identify picture bytes
   /// [useEvent] 返回消息使用 FLCameraEvent
   /// The return message uses flcameraevent
@@ -27,7 +55,7 @@ class FlMlKitTextRecognizeMethodCall {
     if (!_supportPlatform) return null;
     if (useEvent) {
       assert(
-          FlCameraEvent.instance.isPaused, 'Please initialize FLCameraEvent');
+          FlCameraEvent.instance.isPaused, 'Please initialize FlCameraEvent');
     }
     final dynamic map = await _channel.invokeMethod<dynamic>(
         'scanImageByte', <String, dynamic>{
@@ -61,6 +89,13 @@ class FlMlKitTextRecognizeMethodCall {
   /// 开始扫描
   /// Start scanncing
   Future<bool> start() => _scanncing(true);
+
+  /// 获取识别状态
+  /// get scan state
+  Future<bool?> getScanState() async {
+    if (!_supportPlatform) return null;
+    return await _channel.invokeMethod<bool?>('getScanState');
+  }
 
   Future<bool> _scanncing(bool scan) async {
     if (!_supportPlatform) return false;

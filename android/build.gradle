@@ -37,5 +37,8 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.google.android.gms:play-services-mlkit-text-recognition:17.0.0'
+    implementation 'com.google.mlkit:text-recognition:16.0.0-beta1'
+    implementation 'com.google.mlkit:text-recognition-chinese:16.0.0-beta1'
+    implementation 'com.google.mlkit:text-recognition-japanese:16.0.0-beta1'
+
 }

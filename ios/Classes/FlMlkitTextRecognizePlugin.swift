@@ -15,7 +15,7 @@ public class FlMlkitTextRecognizePlugin: NSObject, FlutterPlugin {
 
     init(_ _registrar: FlutterPluginRegistrar, _ _channel: FlutterMethodChannel) {
         channel = _channel
-        methodCall = FlMlkitTextRecognizePlugin(_registrar)
+        methodCall = FlMlKitTextRecognizeMethodCall(_registrar)
         super.init()
     }
 

@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_waya/flutter_waya.dart';
 
 class FlMlKitTextRecognizePage extends StatefulWidget {
-  const FlMlKitTextRecognizePage({Key? key}) : super(key: key);
+  const FlMlKitTextRecognizePage(
+      {Key? key, this.recognizedLanguage = RecognizedLanguage.latin})
+      : super(key: key);
+  final RecognizedLanguage recognizedLanguage;
 
   @override
   _FlMlKitTextRecognizePageState createState() =>
@@ -19,7 +22,6 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
   double? maxRatio;
   StateSetter? zoomState;
   bool flashState = false;
-  bool popState = false;
 
   @override
   void initState() {
@@ -35,6 +37,7 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
         },
         body: Stack(children: <Widget>[
           FlMlKitTextRecognize(
+              recognizedLanguage: widget.recognizedLanguage,
               overlay: const ScannerLine(),
               onFlashChange: (FlashState state) {
                 showToast('$state');
@@ -48,16 +51,15 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
               },
               resolution: CameraResolution.veryHigh,
               autoScanning: false,
-              isFullScreen: false,
+              fit: BoxFit.fitWidth,
               uninitialized: Container(
                   color: Colors.black,
                   alignment: Alignment.center,
                   child: const Text('Camera not initialized',
                       style: TextStyle(color: Colors.white))),
               onListen: (AnalysisTextModel data) {
-                popState = true;
-                if (data.text != null) {
-                  showToast(data.text ?? 'unknown');
+                if (data.text != null && data.text!.isNotEmpty) {
+                  showToast(data.text ?? 'Unknown');
                   model = data;
                   controller.reset();
                 }
@@ -156,20 +158,16 @@ class _RectBox extends StatelessWidget {
   }
 
   Widget boundingBox(Rect rect) {
-    double w = model.width!.toDouble();
-    double h = model.height!.toDouble();
-    w = w / getDevicePixelRatio;
-    h = h / getDevicePixelRatio;
+    final double w = model.width! / getDevicePixelRatio;
+    final double h = model.height! / getDevicePixelRatio;
     return Universal(
         alignment: Alignment.center,
         child: CustomPaint(size: Size(w, h), painter: _LinePainter(rect)));
   }
 
   Widget corners(List<Offset> corners) {
-    double w = model.width!.toDouble();
-    double h = model.height!.toDouble();
-    w = w / getDevicePixelRatio;
-    h = h / getDevicePixelRatio;
+    final double w = model.width! / getDevicePixelRatio;
+    final double h = model.height! / getDevicePixelRatio;
     return Universal(
         alignment: Alignment.center,
         child: CustomPaint(size: Size(w, h), painter: _BoxPainter(corners)));
@@ -221,7 +219,6 @@ class _BoxPainter extends CustomPainter {
         corners[2].dy / getDevicePixelRatio);
     final Offset o3 = Offset(corners[3].dx / getDevicePixelRatio,
         corners[3].dy / getDevicePixelRatio);
-
     final Paint paint = Paint()
       ..color = Colors.blue.withOpacity(0.4)
       ..strokeWidth = 2;
