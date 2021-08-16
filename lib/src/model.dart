@@ -18,7 +18,11 @@ class AnalysisTextModel {
   /// The width of the image from which the barcode is currently parsed
   /// The position of the barcode is converted to the screen by width
   double? width;
+
+  //// Retrieves all the recognized text in the image.
   String? text;
+
+  /// Gets an unmodifiable list of Text.TextBlock, which is a block of text and can be further decomposed to a list of Text.Line.
   List<TextBlock>? textBlocks;
 }
 
@@ -33,6 +37,7 @@ class TextBlock extends TextElement {
     corners = _getCorners(data['corners'] as List<dynamic>?);
   }
 
+  /// Gets an unmodifiable list of Lines that make up this text block.
   List<TextLine>? lines;
 
   List<TextLine>? _getTextLines(List<dynamic>? data) => data != null
@@ -52,6 +57,7 @@ class TextLine extends TextElement {
     corners = _getCorners(data['corners'] as List<dynamic>?);
   }
 
+  /// Gets a unmodifiable list of Elements that make up this text line.
   List<TextElement>? elements;
 
   List<TextElement>? _getTextElement(List<dynamic>? data) => data != null
@@ -76,10 +82,23 @@ class TextElement {
         boundingBox = _getRect(data['boundingBox'] as Map<dynamic, dynamic>?),
         corners = _getCorners(data['corners'] as List<dynamic>?);
 
+  /// Gets the recognized text in the [TextElement]、[TextLine]、[TextBlock].
   String? text;
+
+  /// Gets prevailing language in the text, if any.
+  /// There is data only on Android
   String? recognizedLanguage;
+
+  /// Detected language from text recognition.
+  /// The ISO 639-1 two-letter language code if that is defined (e.g. “en”), or else the ISO 639-2 three-letter code if that is defined, or else a Google-specific code.
+  /// There is data only on IOS
+  /// There is data only in block and lines, and element is null
   List<String>? recognizedLanguages;
+
+  /// Returns the axis-aligned bounding rectangle of the detected text.
   Rect? boundingBox;
+
+  /// Gets the four corner points in clockwise direction starting with top-left.
   List<Offset>? corners;
 }
 
