@@ -1,9 +1,9 @@
 # fl_mlkit_text_recognize
 
-基于[Google ML Kit](https://developers.google.com/ml-kit/vision/barcode-scanning)实现快速稳定识别文字功能，支持Android\IOS
+基于[Google ML Kit](https://developers.google.com/ml-kit/vision/text-recognition/v2)实现快速稳定识别文字功能，支持Android\IOS
 
 Realize fast and stable text recognition function based
-on [Google ML Kit](https://developers.google.com/ml-kit/vision/barcode-scanning), and support Android \ IOS
+on [Google ML Kit](https://developers.google.com/ml-kit/vision/text-recognition/v2), and support Android \ IOS
 
 相机相关功能依赖于 [fl_camera](https://pub.dev/packages/fl_camera)
 
