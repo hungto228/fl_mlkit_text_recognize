@@ -88,31 +88,31 @@ void func() {
 
   /// 设置识别文本的语言类型
   /// Sets the language type that identifies the text
-  FlMlKitTextRecognizeMethodCall.instance.setRecognizedLanguage();
+  FlMlKitTextRecognizeMethodCall.setRecognizedLanguage();
 
   /// 识别图片字节
   /// Identify picture bytes
-  FlMlKitTextRecognizeMethodCall.instance.scanImageByte();
+  FlMlKitTextRecognizeMethodCall().scanImageByte();
 
   /// 打开\关闭 闪光灯 
   /// Turn flash on / off
-  FlMlKitTextRecognizeMethodCall.instance.setFlashMode();
+  FlMlKitTextRecognizeMethodCall().setFlashMode();
 
   /// 相机缩放
   /// Camera zoom
-  FlMlKitTextRecognizeMethodCall.instance.setZoomRatio();
+  FlMlKitTextRecognizeMethodCall().setZoomRatio();
 
   /// 获取识别状态
   /// get scan state
-  FlMlKitTextRecognizeMethodCall.instance.getScanState();
+  FlMlKitTextRecognizeMethodCall().getScanState();
 
   /// 暂停识别
   /// Pause recognition
-  FlMlKitTextRecognizeMethodCall.instance.pause();
+  FlMlKitTextRecognizeMethodCall().pause();
 
   /// 开始识别
   /// Start recognition
-  FlMlKitTextRecognizeMethodCall.instance.start();
+  FlMlKitTextRecognizeMethodCall().start();
 }
 
 ```
