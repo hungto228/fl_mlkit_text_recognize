@@ -7,13 +7,13 @@ environment:
 
 dependencies:
 
-  camera: ^0.8.1+5
+  camera: ^0.9.2+2
   fl_mlkit_text_recognize:
     path: ../
   flutter:
     sdk: flutter
-  flutter_curiosity: ^3.1.1
-  flutter_waya: ^1.11.3
+  flutter_curiosity: ^3.3.0
+  flutter_waya: ^1.13.1
   permission_handler: ^8.1.4+2
 
 dev_dependencies:

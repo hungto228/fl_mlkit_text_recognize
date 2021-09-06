@@ -16,17 +16,14 @@ enum RecognizedLanguage {
 }
 
 class FlMlKitTextRecognizeMethodCall {
-  factory FlMlKitTextRecognizeMethodCall() => _getInstance();
-
-  FlMlKitTextRecognizeMethodCall._internal();
-
-  static FlMlKitTextRecognizeMethodCall get instance => _getInstance();
-  static FlMlKitTextRecognizeMethodCall? _instance;
-
-  static FlMlKitTextRecognizeMethodCall _getInstance() {
-    _instance ??= FlMlKitTextRecognizeMethodCall._internal();
-    return _instance!;
+  factory FlMlKitTextRecognizeMethodCall() {
+    _singleton ??= FlMlKitTextRecognizeMethodCall._();
+    return _singleton!;
   }
+
+  FlMlKitTextRecognizeMethodCall._();
+
+  static FlMlKitTextRecognizeMethodCall? _singleton;
 
   RecognizedLanguage _recognizedLanguage = RecognizedLanguage.latin;
 
@@ -54,8 +51,7 @@ class FlMlKitTextRecognizeMethodCall {
       {int rotationDegrees = 0, bool useEvent = false}) async {
     if (!_supportPlatform) return null;
     if (useEvent) {
-      assert(
-          FlCameraEvent.instance.isPaused, 'Please initialize FlCameraEvent');
+      assert(FlCameraEvent().isPaused, 'Please initialize FlCameraEvent');
     }
     final dynamic map = await _channel.invokeMethod<dynamic>(
         'scanImageByte', <String, dynamic>{
@@ -70,17 +66,17 @@ class FlMlKitTextRecognizeMethodCall {
   /// 打开\关闭 闪光灯
   /// Turn flash on / off
   Future<bool> setFlashMode(bool status) =>
-      FlCameraMethodCall.instance.setFlashMode(status);
+      FlCameraMethodCall().setFlashMode(status);
 
   /// 相机缩放
   /// Camera zoom
   Future<bool> setZoomRatio(double ratio) =>
-      FlCameraMethodCall.instance.setZoomRatio(ratio);
+      FlCameraMethodCall().setZoomRatio(ratio);
 
   /// 获取可用摄像头
   /// get available Cameras
   Future<List<CameraInfo>?> availableCameras() =>
-      FlCameraMethodCall.instance.availableCameras();
+      FlCameraMethodCall().availableCameras();
 
   /// 暂停扫描
   /// Pause scanning

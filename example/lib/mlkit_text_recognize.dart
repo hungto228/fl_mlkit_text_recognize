@@ -82,7 +82,7 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
                           onChanged: (double value) async {
                             ratio = value;
                             zoomState!(() {});
-                            FlMlKitTextRecognizeMethodCall.instance
+                            FlMlKitTextRecognizeMethodCall()
                                 .setZoomRatio(value);
                           }),
                       IconBox(
@@ -94,7 +94,7 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
                           icon: flashState ? Icons.flash_on : Icons.flash_off,
                           onTap: () async {
                             final bool state =
-                                await FlMlKitTextRecognizeMethodCall.instance
+                                await FlMlKitTextRecognizeMethodCall()
                                     .setFlashMode(!flashState);
                             flashState = !flashState;
                             if (state) zoomState!(() {});
@@ -117,11 +117,9 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
                             text: value ? 'pause' : 'start',
                             onPressed: () async {
                               final bool data = value!
-                                  ? await FlMlKitTextRecognizeMethodCall
-                                      .instance
+                                  ? await FlMlKitTextRecognizeMethodCall()
                                       .pause()
-                                  : await FlMlKitTextRecognizeMethodCall
-                                      .instance
+                                  : await FlMlKitTextRecognizeMethodCall()
                                       .start();
                               if (data) updater(!value);
                               if (value) {

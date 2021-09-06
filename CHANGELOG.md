@@ -1,3 +1,5 @@
+## 0.1.0
+ * remove instance , direct initialization
 ## 0.0.3
  * update gradle version
  * update kotlin version

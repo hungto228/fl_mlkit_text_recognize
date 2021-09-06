@@ -79,7 +79,7 @@ class _FlMlKitTextRecognizeState extends FlCameraState<FlMlKitTextRecognize> {
     /// Add message callback
     await initEvent(eventListen);
 
-    await FlMlKitTextRecognizeMethodCall.instance
+    await FlMlKitTextRecognizeMethodCall()
         .setRecognizedLanguage(widget.recognizedLanguage);
 
     /// Initialize camera
@@ -89,7 +89,7 @@ class _FlMlKitTextRecognizeState extends FlCameraState<FlMlKitTextRecognize> {
       setState(() {});
 
       /// Start scan
-      if (widget.autoScanning) FlMlKitTextRecognizeMethodCall.instance.start();
+      if (widget.autoScanning) FlMlKitTextRecognizeMethodCall().start();
     });
   }
 
@@ -152,6 +152,6 @@ class _FlMlKitTextRecognizeState extends FlCameraState<FlMlKitTextRecognize> {
   @override
   void dispose() {
     super.dispose();
-    FlMlKitTextRecognizeMethodCall.instance.pause();
+    FlMlKitTextRecognizeMethodCall().pause();
   }
 }

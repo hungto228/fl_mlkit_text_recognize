@@ -47,8 +47,7 @@ class _ImageScanPageState extends State<ImageScanPage> {
     if (isIOS) hasPermission = true;
     if (hasPermission) {
       final File file = File(path!);
-      final AnalysisTextModel? data = await FlMlKitTextRecognizeMethodCall
-          .instance
+      final AnalysisTextModel? data = await FlMlKitTextRecognizeMethodCall()
           .scanImageByte(file.readAsBytesSync());
       if (data != null) {
         model = data;
@@ -64,7 +63,7 @@ class _ImageScanPageState extends State<ImageScanPage> {
     if (isAndroid) hasPermission = await getPermission(Permission.storage);
     if (isIOS) hasPermission = true;
     if (hasPermission) {
-      final String? data = await openSystemGallery();
+      final String? data = await Curiosity().gallery.openSystemGallery();
       path = data;
       setState(() {});
     }
