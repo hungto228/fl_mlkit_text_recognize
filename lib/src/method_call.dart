@@ -16,10 +16,8 @@ enum RecognizedLanguage {
 }
 
 class FlMlKitTextRecognizeMethodCall {
-  factory FlMlKitTextRecognizeMethodCall() {
-    _singleton ??= FlMlKitTextRecognizeMethodCall._();
-    return _singleton!;
-  }
+  factory FlMlKitTextRecognizeMethodCall() =>
+      _singleton ??= FlMlKitTextRecognizeMethodCall._();
 
   FlMlKitTextRecognizeMethodCall._();
 
