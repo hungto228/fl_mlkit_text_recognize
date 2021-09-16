@@ -88,7 +88,7 @@ void func() {
 
   /// 设置识别文本的语言类型
   /// Sets the language type that identifies the text
-  FlMlKitTextRecognizeMethodCall.setRecognizedLanguage();
+  FlMlKitTextRecognizeMethodCall().setRecognizedLanguage();
 
   /// 识别图片字节
   /// Identify picture bytes
