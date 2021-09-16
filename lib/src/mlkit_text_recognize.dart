@@ -122,10 +122,11 @@ class _FlMlKitTextRecognizeState extends FlCameraState<FlMlKitTextRecognize> {
         oldWidget.autoScanning != widget.autoScanning ||
         oldWidget.fit != widget.fit ||
         oldWidget.onListen != widget.onListen) {
-      if (widget.updateReset)
+      if (widget.updateReset) {
         cameraMethodCall.dispose().then((bool value) {
           if (value) init();
         });
+      }
     }
   }
 
@@ -141,11 +142,12 @@ class _FlMlKitTextRecognizeState extends FlCameraState<FlMlKitTextRecognize> {
   @override
   Widget build(BuildContext context) {
     Widget camera = super.build(context);
-    if (widget.overlay != null)
+    if (widget.overlay != null) {
       camera = Stack(children: <Widget>[
         camera,
         SizedBox.expand(child: widget.overlay),
       ]);
+    }
     return camera;
   }
 

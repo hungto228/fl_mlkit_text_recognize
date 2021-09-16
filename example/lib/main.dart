@@ -43,21 +43,22 @@ class _AppState extends State<_App> {
   }
 
   void scanImage() {
-    push(ImageScanPage());
+    push(const ImageScanPage());
   }
 
   Future<void> scanCamera() async {
     if (!isMobile) return;
     final bool permission = await getPermission(Permission.camera);
-    if (permission) push(CameraScanPage());
+    if (permission) push(const CameraScanPage());
   }
 
   Future<void> openCamera(RecognizedLanguage recognizedLanguage) async {
     bool hasPermission = false;
     if (isAndroid) hasPermission = await getPermission(Permission.camera);
     if (isIOS) hasPermission = true;
-    if (hasPermission)
+    if (hasPermission) {
       push(FlMlKitTextRecognizePage(recognizedLanguage: recognizedLanguage));
+    }
   }
 }
 
@@ -94,9 +95,10 @@ class AppBarText extends AppBar {
 }
 
 class ShowText extends StatelessWidget {
-  const ShowText(this.keyName, this.value) : super();
   final dynamic keyName;
   final dynamic value;
+
+  const ShowText(this.keyName, this.value, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
