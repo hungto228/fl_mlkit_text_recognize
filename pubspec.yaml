@@ -1,6 +1,6 @@
 name: fl_mlkit_text_recognize
 description: Google mlkit text recognize plugin, supports Android and IOS.
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/Wayaer/fl_mlkit_text_recognize.git
 
 environment:
