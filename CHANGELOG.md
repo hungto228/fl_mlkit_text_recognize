@@ -1,3 +1,5 @@
+## 0.1.2
+ * update [`fl_camera`](https://pub.dev/packages/fl_camera)
 ## 0.1.1
  * fix invalid `uninitialized`
 ## 0.1.0
