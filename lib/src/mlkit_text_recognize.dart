@@ -86,10 +86,12 @@ class _FlMlKitTextRecognizeState extends FlCameraState<FlMlKitTextRecognize> {
     initCamera(camera: widget.camera, resolution: widget.resolution)
         .then((bool value) {
       if (!value) return;
-      setState(() {});
+      if (mounted) {
+        setState(() {});
 
-      /// Start scan
-      if (widget.autoScanning) FlMlKitTextRecognizeMethodCall().start();
+        /// Start scan
+        if (widget.autoScanning) FlMlKitTextRecognizeMethodCall().start();
+      }
     });
   }
 
