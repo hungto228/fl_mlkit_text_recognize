@@ -56,7 +56,7 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
         body: Stack(children: <Widget>[
           FlMlKitTextRecognize(
               recognizedLanguage: widget.recognizedLanguage,
-              frequency: 800,
+              frequency: 1000,
               camera: currentCamera,
               onCreateView: (FlMlKitTextRecognizeController _controller) {
                 scanningController.value = _controller;
