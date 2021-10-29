@@ -17,6 +17,8 @@ class ImageScanPage extends StatefulWidget {
 class _ImageScanPageState extends State<ImageScanPage> {
   String? path;
   AnalysisTextModel? model;
+  List<String> types = ['latin', 'chinese', 'japanese'];
+  int? selectIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +28,38 @@ class _ImageScanPageState extends State<ImageScanPage> {
         isScroll: true,
         children: <Widget>[
           ElevatedText(onPressed: openGallery, text: 'Select Picture'),
+          ElevatedButton(
+              onPressed: () {},
+              child: DropdownMenuButton.material(
+                  itemCount: types.length,
+                  iconColor: Colors.white,
+                  onChanged: (int index) {
+                    selectIndex = index;
+                    late RecognizedLanguage recognizedLanguage;
+                    switch (index) {
+                      case 0:
+                        recognizedLanguage = RecognizedLanguage.latin;
+                        break;
+                      case 1:
+                        recognizedLanguage = RecognizedLanguage.chinese;
+                        break;
+                      case 2:
+                        recognizedLanguage = RecognizedLanguage.japanese;
+                        break;
+                    }
+                    FlMlKitTextRecognizeController()
+                        .setRecognizedLanguage(recognizedLanguage);
+                  },
+                  defaultBuilder: (int? index) => BText(index == null
+                      ? 'Select Recognized Language'
+                      : types[index]),
+                  itemBuilder: (int index) => Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 4),
+                      decoration: const BoxDecoration(
+                          border:
+                              Border(bottom: BorderSide(color: Colors.grey))),
+                      child: BText(types[index], color: Colors.black)))),
           ElevatedText(onPressed: scanByte, text: 'Scanning'),
           ShowText('path', path),
           if (path != null && path!.isNotEmpty)
@@ -45,12 +79,15 @@ class _ImageScanPageState extends State<ImageScanPage> {
     if (path == null || path!.isEmpty) {
       return showToast('Please select a picture');
     }
+    if (selectIndex == null) {
+      return showToast('Please select recognized language');
+    }
     bool hasPermission = false;
     if (isAndroid) hasPermission = await getPermission(Permission.storage);
     if (isIOS) hasPermission = true;
     if (hasPermission) {
       final File file = File(path!);
-      final AnalysisTextModel? data = await FlMlKitTextRecognizeMethodCall()
+      final AnalysisTextModel? data = await FlMlKitTextRecognizeController()
           .scanImageByte(file.readAsBytesSync());
       if (data != null) {
         model = data;

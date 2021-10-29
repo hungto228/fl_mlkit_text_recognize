@@ -25,24 +25,26 @@ class FlMlKitTextRecognizeMethodCall(
 ) :
     FlCameraMethodCall(activity, plugin) {
 
-    private var options: TextRecognizerOptionsInterface = TextRecognizerOptions.DEFAULT_OPTIONS
-
-    private var scan = false
+    private var options: TextRecognizerOptionsInterface =
+        TextRecognizerOptions.DEFAULT_OPTIONS
+    private var canScan = false
+    private var frequency = 0L
+    private var lastCurrentTime = 0L
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
-            "startPreview" -> startPreview(imageAnalyzer, call, result)
+            "startPreview" -> {
+                val value = call.argument<Double>("frequency")!!
+                frequency = value.toLong()
+                startPreview(imageAnalyzer, call, result)
+            }
             "scanImageByte" -> scanImageByte(call, result)
-            "getScanState" -> result.success(scan)
             "setRecognizedLanguage" -> {
                 setRecognizedLanguage(call)
                 result.success(true)
             }
             "scan" -> {
-                val argument = call.arguments as Boolean
-                if (argument != scan) {
-                    scan = argument
-                }
+                canScan = call.arguments as Boolean
                 result.success(true)
             }
             else -> {
@@ -54,8 +56,10 @@ class FlMlKitTextRecognizeMethodCall(
     private fun setRecognizedLanguage(call: MethodCall) {
         when (call.arguments as String) {
             "latin" -> options = TextRecognizerOptions.DEFAULT_OPTIONS
-            "chinese" -> options = ChineseTextRecognizerOptions.Builder().build()
-            "japanese" -> options = JapaneseTextRecognizerOptions.Builder().build()
+            "chinese" -> options =
+                ChineseTextRecognizerOptions.Builder().build()
+            "japanese" -> options =
+                JapaneseTextRecognizerOptions.Builder().build()
         }
     }
 
@@ -76,10 +80,15 @@ class FlMlKitTextRecognizeMethodCall(
     @SuppressLint("UnsafeOptInUsageError")
     private val imageAnalyzer = ImageAnalysis.Analyzer { imageProxy ->
         val mediaImage = imageProxy.image
-        if (mediaImage != null && scan) {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastCurrentTime >= frequency && mediaImage != null && canScan) {
             val inputImage =
-                InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+                InputImage.fromMediaImage(
+                    mediaImage,
+                    imageProxy.imageInfo.rotationDegrees
+                )
             analysis(inputImage, null, imageProxy)
+            lastCurrentTime = currentTime
         } else {
             imageProxy.close()
         }
@@ -148,7 +157,12 @@ class FlMlKitTextRecognizeMethodCall(
         )
 
     private val Rect.data: Map<String, Int>
-        get() = mapOf("top" to top, "bottom" to bottom, "left" to left, "right" to right)
+        get() = mapOf(
+            "top" to top,
+            "bottom" to bottom,
+            "left" to left,
+            "right" to right
+        )
 
     private val Point.data: Map<String, Double>
         get() = mapOf("x" to x.toDouble(), "y" to y.toDouble())

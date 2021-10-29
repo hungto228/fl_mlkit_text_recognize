@@ -24,9 +24,14 @@ Camera related functions depend on [fl_camera](https://pub.dev/packages/fl_camer
 
 Widget build(BuildContext context) {
   return FlMlKitTextRecognize(
-
-    /// 需要预览的相机
-    /// Camera ID to preview
+    /// 如果你设置为10, 2次解析数据间隔为10 毫秒，数字越小 在ios上cpu占有率越高，数字越大，识别速度会变慢，建议设置500-100
+    /// If you set it to 10, The interval between data parsing is 10 milliseconds
+    /// The larger the number, the slower the parsing,If the number is too small, the CPU percentage will be too high on ios
+    /// Therefore, the recommended setting range is 500 to 1000
+      frequency: 500,
+    
+      /// 需要预览的相机
+      /// Camera ID to preview
       camera: camera,
 
       /// 预览相机支持的分辨率
@@ -47,13 +52,13 @@ Widget build(BuildContext context) {
 
       /// 闪光灯状态
       /// Flash status
-      onFlashChange: (FlashState state) {
+      onFlashChanged: (FlashState state) {
         showToast('$state');
       },
 
       /// 缩放变化
       /// zoom ratio
-      onFlashChange: (FlashState state) {
+      onFlashChanged: (FlashState state) {
         showToast('$state');
       },
 
@@ -72,7 +77,7 @@ Widget build(BuildContext context) {
 
       /// 文本识别回调
       /// Text recognized callback
-      onListen: (AnalysisTextModel data) {
+      onDataChanged: (AnalysisTextModel data) {
         if (data.text != null && data.text!.isNotEmpty) {
 
         }
@@ -88,31 +93,27 @@ void func() {
 
   /// 设置识别文本的语言类型
   /// Sets the language type that identifies the text
-  FlMlKitTextRecognizeMethodCall().setRecognizedLanguage();
+  controller.setRecognizedLanguage();
 
   /// 识别图片字节
   /// Identify picture bytes
-  FlMlKitTextRecognizeMethodCall().scanImageByte();
+  controller.scanImageByte();
 
   /// 打开\关闭 闪光灯 
   /// Turn flash on / off
-  FlMlKitTextRecognizeMethodCall().setFlashMode();
+  controller.setFlashMode();
 
   /// 相机缩放
   /// Camera zoom
-  FlMlKitTextRecognizeMethodCall().setZoomRatio();
-
-  /// 获取识别状态
-  /// get scan state
-  FlMlKitTextRecognizeMethodCall().getScanState();
-
+  controller.setZoomRatio();
+  
   /// 暂停识别
   /// Pause recognition
-  FlMlKitTextRecognizeMethodCall().pause();
+  controller.pause();
 
   /// 开始识别
   /// Start recognition
-  FlMlKitTextRecognizeMethodCall().start();
+  controller.start();
 }
 
 ```

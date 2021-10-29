@@ -21,7 +21,6 @@ class _AppState extends State<_App> {
   Widget build(BuildContext context) {
     return ExtendedScaffold(
         appBar: AppBarText('Fl MlKit Text Recognize'),
-        mainAxisAlignment: MainAxisAlignment.center,
         padding: const EdgeInsets.all(30),
         children: <Widget>[
           const SizedBox(height: 10),
@@ -142,4 +141,15 @@ class ElevatedText extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       ElevatedButton(onPressed: onPressed, child: Text(text));
+}
+
+class ElevatedIcon extends StatelessWidget {
+  const ElevatedIcon({Key? key, this.onPressed, required this.icon})
+      : super(key: key);
+  final VoidCallback? onPressed;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) => ElevatedButton(
+      onPressed: onPressed, child: Icon(icon, color: Colors.white));
 }

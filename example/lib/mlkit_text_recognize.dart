@@ -16,17 +16,35 @@ class FlMlKitTextRecognizePage extends StatefulWidget {
 
 class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
     with TickerProviderStateMixin {
-  late AnimationController controller;
+  late AnimationController animationController;
   AnalysisTextModel? model;
   double ratio = 1;
   double? maxRatio;
   StateSetter? zoomState;
   bool flashState = false;
+  ValueNotifier<FlMlKitTextRecognizeController?> scanningController =
+      ValueNotifier<FlMlKitTextRecognizeController?>(null);
+
+  ///  The first rendering is null ，Using the rear camera
+  CameraInfo? currentCamera;
+  bool isBcakCamera = true;
+
+  ValueNotifier<bool> hasPreview = ValueNotifier<bool>(false);
+  ValueNotifier<bool> canScan = ValueNotifier<bool>(false);
 
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(vsync: this);
+    animationController = AnimationController(vsync: this);
+  }
+
+  void listener() {
+    if (hasPreview.value != scanningController.value!.hasPreview) {
+      hasPreview.value = scanningController.value!.hasPreview;
+    }
+    if (canScan.value != scanningController.value!.canScan) {
+      canScan.value = scanningController.value!.canScan;
+    }
   }
 
   @override
@@ -38,34 +56,39 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
         body: Stack(children: <Widget>[
           FlMlKitTextRecognize(
               recognizedLanguage: widget.recognizedLanguage,
-              overlay: const ScannerLine(),
-              onFlashChange: (FlashState state) {
+              frequency: 800,
+              camera: currentCamera,
+              onCreateView: (FlMlKitTextRecognizeController _controller) {
+                scanningController.value = _controller;
+                scanningController.value!.addListener(listener);
+              },
+              onFlashChanged: (FlashState state) {
                 showToast('$state');
               },
-              onZoomChange: (CameraZoomState zommState) {
-                showToast('zoom ratio:${zommState.zoomRatio}');
+              onZoomChanged: (CameraZoomState zoom) {
+                showToast('zoom ratio:${zoom.zoomRatio}');
                 if (maxRatio == null && zoomState != null) {
-                  maxRatio = zommState.maxZoomRatio;
+                  maxRatio = zoom.maxZoomRatio;
                   zoomState!(() {});
                 }
               },
               resolution: CameraResolution.veryHigh,
-              autoScanning: false,
+              autoScanning: true,
               fit: BoxFit.fitWidth,
               uninitialized: Container(
                   color: Colors.black,
                   alignment: Alignment.center,
                   child: const Text('Camera not initialized',
-                      style: TextStyle(color: Colors.white))),
-              onListen: (AnalysisTextModel data) {
+                      style: TextStyle(color: Colors.blueAccent))),
+              onDataChanged: (AnalysisTextModel data) {
                 if (data.text != null && data.text!.isNotEmpty) {
                   showToast(data.text ?? 'Unknown');
                   model = data;
-                  controller.reset();
+                  animationController.reset();
                 }
               }),
           AnimatedBuilder(
-              animation: controller,
+              animation: animationController,
               builder: (_, __) =>
                   model != null ? _RectBox(model!) : const SizedBox()),
           Align(
@@ -82,8 +105,7 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
                           onChanged: (double value) async {
                             ratio = value;
                             zoomState!(() {});
-                            FlMlKitTextRecognizeMethodCall()
-                                .setZoomRatio(value);
+                            scanningController.value?.setZoomRatio(value);
                           }),
                       IconBox(
                           size: 30,
@@ -93,11 +115,15 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
                           padding: const EdgeInsets.fromLTRB(10, 10, 10, 40),
                           icon: flashState ? Icons.flash_on : Icons.flash_off,
                           onTap: () async {
-                            final bool state =
-                                await FlMlKitTextRecognizeMethodCall()
-                                    .setFlashMode(!flashState);
+                            final bool? state = await scanningController.value
+                                ?.setFlashMode(flashState
+                                    ? FlashState.off
+                                    : FlashState.on);
                             flashState = !flashState;
-                            if (state) zoomState!(() {});
+                            if (state == true) {
+                              flashState = !flashState;
+                              zoomState!(() {});
+                            }
                           })
                     ]);
               })),
@@ -105,38 +131,85 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
               right: 12,
               left: 12,
               top: getStatusBarHeight + 12,
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    const BackButton(color: Colors.white, onPressed: pop),
-                    ValueBuilder<bool>(
-                        initialValue: false,
-                        builder: (_, bool? value, ValueCallback<bool> updater) {
-                          value ??= false;
-                          return ElevatedText(
-                            text: value ? 'pause' : 'start',
-                            onPressed: () async {
-                              final bool data = value!
-                                  ? await FlMlKitTextRecognizeMethodCall()
-                                      .pause()
-                                  : await FlMlKitTextRecognizeMethodCall()
-                                      .start();
-                              if (data) updater(!value);
-                              if (value) {
-                                model = null;
-                                controller.reset();
-                              }
-                            },
-                          );
-                        }),
-                  ])),
+              child: ValueListenableBuilder<FlMlKitTextRecognizeController?>(
+                  valueListenable: scanningController,
+                  builder: (_, FlMlKitTextRecognizeController? controller, __) {
+                    return controller == null
+                        ? const SizedBox()
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                                const BackButton(
+                                    color: Colors.white, onPressed: pop),
+                                Row(children: [
+                                  ElevatedIcon(
+                                      icon: Icons.flip_camera_ios,
+                                      onPressed: switchCamera),
+                                  const SizedBox(width: 12),
+                                  previewButton(controller),
+                                  const SizedBox(width: 12),
+                                  canScanButton(controller),
+                                ])
+                              ]);
+                  })),
         ]));
+  }
+
+  Widget canScanButton(FlMlKitTextRecognizeController scanningController) {
+    return ValueListenableBuilder(
+        valueListenable: canScan,
+        builder: (_, bool value, __) {
+          return ElevatedText(
+              text: value ? 'pause' : 'start',
+              onPressed: () async {
+                value
+                    ? await scanningController.pauseScan()
+                    : await scanningController.startScan();
+                model = null;
+                animationController.reset();
+              });
+        });
+  }
+
+  Widget previewButton(FlMlKitTextRecognizeController scanningController) {
+    return ValueListenableBuilder(
+        valueListenable: hasPreview,
+        builder: (_, bool hasPreview, __) {
+          return ElevatedText(
+            text: !hasPreview ? 'start' : 'stop',
+            onPressed: () async {
+              if (!hasPreview) {
+                if (scanningController.previousCamera != null) {
+                  await scanningController
+                      .startPreview(scanningController.previousCamera!);
+                }
+              } else {
+                await scanningController.stopPreview();
+              }
+            },
+          );
+        });
+  }
+
+  Future<void> switchCamera() async {
+    if (scanningController.value == null) return;
+    for (final CameraInfo cameraInfo in scanningController.value!.cameras!) {
+      if (cameraInfo.lensFacing ==
+          (isBcakCamera ? CameraLensFacing.front : CameraLensFacing.back)) {
+        currentCamera = cameraInfo;
+        break;
+      }
+    }
+    await scanningController.value!.switchCamera(currentCamera!);
+    isBcakCamera = !isBcakCamera;
   }
 
   @override
   void dispose() {
     super.dispose();
-    controller.dispose();
+    animationController.dispose();
+    scanningController.dispose();
+    hasPreview.dispose();
   }
 }
 

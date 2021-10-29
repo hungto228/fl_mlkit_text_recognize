@@ -5,17 +5,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-export 'package:fl_camera/fl_camera.dart';
+export 'package:fl_camera/fl_camera.dart' hide CameraController;
 
-part 'src/method_call.dart';
+part 'src/controller.dart';
 
 part 'src/mlkit_text_recognize.dart';
 
 part 'src/model.dart';
 
 const MethodChannel _flMlKitTextRecognizeChannel =
-    MethodChannel(_flMlKitTextRecognize);
-const String _flMlKitTextRecognize = 'fl.mlkit.text.recognize';
+    MethodChannel('fl.mlkit.text.recognize');
 
 bool get _supportPlatform {
   if (!kIsWeb && (_isAndroid || _isIOS)) return true;
