@@ -15,7 +15,7 @@ Camera related functions depend on [fl_camera](https://pub.dev/packages/fl_camer
 
 ```plist
 <key>NSCameraUsageDescription</key>
-<string>是否允许FlMlKitScanning使用你的相机？</string>
+<string>是否允许FlMlKitTextRecognize使用你的相机？</string>
 ```
 
 - 预览 preview
