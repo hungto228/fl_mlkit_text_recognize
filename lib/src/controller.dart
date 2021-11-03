@@ -86,7 +86,7 @@ class FlMlKitTextRecognizeController extends CameraController {
       final String? barcodes = data['text'] as String?;
       if (barcodes != null) {
         data = AnalysisTextModel.fromMap(data);
-        if (onDataChanged != null) onDataChanged!(data);
+        onDataChanged?.call(data);
       }
     }
   }
