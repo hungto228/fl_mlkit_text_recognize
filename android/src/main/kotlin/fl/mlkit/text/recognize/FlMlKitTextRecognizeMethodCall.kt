@@ -10,9 +10,12 @@ import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.TextRecognizer
 import com.google.mlkit.vision.text.TextRecognizerOptionsInterface
 import com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions
+import com.google.mlkit.vision.text.devanagari.DevanagariTextRecognizerOptions
 import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
+import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import fl.camera.FlCameraMethodCall
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -25,8 +28,8 @@ class FlMlKitTextRecognizeMethodCall(
 ) :
     FlCameraMethodCall(activity, plugin) {
 
-    private var options: TextRecognizerOptionsInterface =
-        TextRecognizerOptions.DEFAULT_OPTIONS
+    private var options: TextRecognizerOptionsInterface = TextRecognizerOptions.DEFAULT_OPTIONS
+    private var recognizer: TextRecognizer? = null
     private var canScan = false
     private var frequency = 0L
     private var lastCurrentTime = 0L
@@ -41,10 +44,16 @@ class FlMlKitTextRecognizeMethodCall(
             "scanImageByte" -> scanImageByte(call, result)
             "setRecognizedLanguage" -> {
                 setRecognizedLanguage(call)
+                recognizer?.close()
+                recognizer = null
                 result.success(true)
             }
             "scan" -> {
                 canScan = call.arguments as Boolean
+                result.success(true)
+            }
+            "dispose" -> {
+                dispose()
                 result.success(true)
             }
             else -> {
@@ -53,6 +62,13 @@ class FlMlKitTextRecognizeMethodCall(
         }
     }
 
+    override fun dispose() {
+        super.dispose();
+        recognizer?.close()
+        recognizer = null
+    }
+
+
     private fun setRecognizedLanguage(call: MethodCall) {
         when (call.arguments as String) {
             "latin" -> options = TextRecognizerOptions.DEFAULT_OPTIONS
@@ -60,6 +76,10 @@ class FlMlKitTextRecognizeMethodCall(
                 ChineseTextRecognizerOptions.Builder().build()
             "japanese" -> options =
                 JapaneseTextRecognizerOptions.Builder().build()
+            "korean" -> options =
+                KoreanTextRecognizerOptions.Builder().build()
+            "devanagari" -> options =
+                DevanagariTextRecognizerOptions.Builder().build()
         }
     }
 
@@ -100,7 +120,7 @@ class FlMlKitTextRecognizeMethodCall(
         result: MethodChannel.Result?,
         imageProxy: ImageProxy?
     ) {
-        val recognizer = TextRecognition.getClient(options)
+        val recognizer = getTextRecognition()
         recognizer.process(inputImage)
             .addOnSuccessListener { visionText ->
                 var width = inputImage.width
@@ -123,6 +143,13 @@ class FlMlKitTextRecognizeMethodCall(
             .addOnFailureListener { result?.success(null) }
             .addOnCompleteListener { imageProxy?.close() }
 
+    }
+
+    private fun getTextRecognition(): TextRecognizer {
+        if (recognizer == null) {
+            recognizer = TextRecognition.getClient(options)
+        }
+        return recognizer!!
     }
 
 

@@ -27,17 +27,8 @@ class _AppState extends State<_App> {
           ElevatedText(onPressed: scanImage, text: 'Image recognition'),
           const SizedBox(height: 10),
           ElevatedText(
-              onPressed: () => openCamera(RecognizedLanguage.latin),
-              text: 'Camera recognition Latin'),
+              onPressed: () => openCamera(), text: 'Camera recognition'),
           const SizedBox(height: 10),
-          ElevatedText(
-              onPressed: () => openCamera(RecognizedLanguage.chinese),
-              text: 'Camera recognition Chinese'),
-          const SizedBox(height: 10),
-          ElevatedText(
-              onPressed: () => openCamera(RecognizedLanguage.japanese),
-              text: 'Camera recognition Japanese'),
-          const SizedBox(height: 30),
         ]);
   }
 
@@ -51,13 +42,11 @@ class _AppState extends State<_App> {
     if (permission) push(const CameraScanPage());
   }
 
-  Future<void> openCamera(RecognizedLanguage recognizedLanguage) async {
+  Future<void> openCamera() async {
     bool hasPermission = false;
     if (isAndroid) hasPermission = await getPermission(Permission.camera);
     if (isIOS) hasPermission = true;
-    if (hasPermission) {
-      push(FlMlKitTextRecognizePage(recognizedLanguage: recognizedLanguage));
-    }
+    if (hasPermission) push(const FlMlKitTextRecognizePage());
   }
 }
 

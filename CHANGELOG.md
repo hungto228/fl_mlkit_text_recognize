@@ -1,23 +1,26 @@
+## 1.1.0
+ * Added `Korean` and `Devanagari` support
+ * Optimization can switch languages without destroying the camera
 ## 1.0.0
- * update [`fl_camera`](https://pub.dev/packages/fl_camera)
- * add intercept callback
- * remove `FlMlKitTextRecognizeMethodCall()`
- * add `onCreateView` for `FlMlKitTextRecognizeController()`
- * add `frequency` for `FlMlKitTextRecognizeController()`
- * add `stopPreview()` for `FlMlKitTextRecognizeController()`
- * add `switchCamera()` for `FlMlKitTextRecognizeController()`
- * add `resetCamera()` for `FlMlKitTextRecognizeController()`
- * modify `onFlashChange` to `onFlashChanged`
- * modify `onZoomChange` to `onZoomChanged`
- * modify `onListen` to `onDataChanged`
+ * Update [`fl_camera`](https://pub.dev/packages/fl_camera)
+ * Add intercept callback
+ * Remove `FlMlKitTextRecognizeMethodCall()`
+ * Add `onCreateView` for `FlMlKitTextRecognizeController()`
+ * Add `frequency` for `FlMlKitTextRecognizeController()`
+ * Add `stopPreview()` for `FlMlKitTextRecognizeController()`
+ * Add `switchCamera()` for `FlMlKitTextRecognizeController()`
+ * Add `resetCamera()` for `FlMlKitTextRecognizeController()`
+ * Modify `onFlashChange` to `onFlashChanged`
+ * Modify `onZoomChange` to `onZoomChanged`
+ * Modify `onListen` to `onDataChanged`
 ## 0.1.2
- * update [`fl_camera`](https://pub.dev/packages/fl_camera)
+ * Update [`fl_camera`](https://pub.dev/packages/fl_camera)
 ## 0.1.1
- * fix invalid `uninitialized`
+ * Fix invalid `uninitialized`
 ## 0.1.0
- * remove instance , direct initialization
+ * Remove instance , direct initialization
 ## 0.0.3
- * update gradle version
- * update kotlin version
+ * Update gradle version
+ * Update kotlin version
 ## 0.0.1
- * initial release.
+ * Initial release.

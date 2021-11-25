@@ -8,11 +8,14 @@ enum RecognizedLanguage {
   /// 中文
   chinese,
 
-  /// 日语
+  /// 日本語
   japanese,
 
-  /// Include all above
-  // all,
+  /// 한국어
+  korean,
+
+  /// देवनागरी
+  devanagari,
 }
 
 class FlMlKitTextRecognizeController extends CameraController {
@@ -43,6 +46,9 @@ class FlMlKitTextRecognizeController extends CameraController {
   bool get canScan => _canScan;
 
   RecognizedLanguage _recognizedLanguage = RecognizedLanguage.latin;
+
+  /// The currently recognized language
+  RecognizedLanguage get currentRecognizedLanguage => _recognizedLanguage;
 
   /// 初始化消息通道和基础配置
   /// Initialize the message channel and basic configuration

@@ -4,17 +4,17 @@ import Flutter
 import Foundation
 import MLKitTextRecognition
 import MLKitTextRecognitionChinese
+import MLKitTextRecognitionDevanagari
 import MLKitTextRecognitionJapanese
+import MLKitTextRecognitionKorean
 import MLKitVision
 
 class FlMlKitTextRecognizeMethodCall: FlCameraMethodCall {
-    var options: CommonTextRecognizerOptions = TextRecognizerOptions()
-
+    private var options: CommonTextRecognizerOptions = TextRecognizerOptions()
     private var canScan: Bool = false
-
     private var frequency: Double = 0
-
     private var lastCurrentTime: TimeInterval = 0
+    private var recognizer: TextRecognizer?
 
     override init(_ _registrar: FlutterPluginRegistrar) {
         super.init(_registrar)
@@ -28,12 +28,13 @@ class FlMlKitTextRecognizeMethodCall: FlCameraMethodCall {
                 let currentTime = Date().timeIntervalSince1970 * 1000
                 if currentTime - lastCurrentTime >= frequency, canScan {
                     let buffer = CMSampleBufferGetImageBuffer(sampleBuffer)
-                    self.analysis(buffer!.image, nil)
+                    analysis(buffer!.image, nil)
                     lastCurrentTime = currentTime
                 }
             }, call: call, result)
         case "setRecognizedLanguage":
             setRecognizedLanguage(call)
+            recognizer = nil
             result(true)
         case "scanImageByte":
             let arguments = call.arguments as! [AnyHashable: Any?]
@@ -50,33 +51,52 @@ class FlMlKitTextRecognizeMethodCall: FlCameraMethodCall {
         case "scan":
             canScan = call.arguments as! Bool
             result(true)
+        case "dispose":
+            dispose()
+            result(true)
         default:
             super.handle(call: call, result: result)
         }
     }
 
-    func setRecognizedLanguage(_ call: FlutterMethodCall) {
+    override func dispose() {
+        super.dispose()
+        recognizer = nil
+    }
+
+    private func setRecognizedLanguage(_ call: FlutterMethodCall) {
         let type = call.arguments as! String
         switch type {
-        case "pattern":
+        case "latin":
             options = TextRecognizerOptions()
         case "chinese":
             options = ChineseTextRecognizerOptions()
         case "japanese":
             options = JapaneseTextRecognizerOptions()
+        case "korean":
+            options = KoreanTextRecognizerOptions()
+        case "devanagari":
+            options = DevanagariTextRecognizerOptions()
         default:
             options = TextRecognizerOptions()
         }
     }
 
-    func analysis(_ image: UIImage, _ result: FlutterResult?) {
+    private func getTextRecognition() -> TextRecognizer {
+        if recognizer == nil {
+            recognizer = TextRecognizer.textRecognizer(options: options)
+        }
+        return recognizer!
+    }
+
+    private func analysis(_ image: UIImage, _ result: FlutterResult?) {
         let visionImage = VisionImage(image: image)
         if flCamera == nil {
             visionImage.orientation = .up
         } else {
             visionImage.orientation = flCamera!.imageOrientation()
         }
-        let textRecognizer = TextRecognizer.textRecognizer(options: options)
+        let textRecognizer = getTextRecognition()
         textRecognizer.process(visionImage) { [self] visionText, error in
             if error == nil, visionText != nil {
                 var map = visionText!.data
@@ -127,7 +147,7 @@ extension CVBuffer {
 
 extension CGRect {
     var data: [String: Any?] {
-        return [
+        [
             "x": origin.x,
             "y": origin.y,
             "width": width,
@@ -139,27 +159,41 @@ extension CGRect {
 extension Text {
     var data: [String: Any?] {
         ["text": text,
-         "textBlocks": blocks.map { $0.data }]
+         "textBlocks": blocks.map {
+             $0.data
+         }]
     }
 }
 
 extension TextBlock {
     var data: [String: Any?] {
         ["text": text,
-         "recognizedLanguages": recognizedLanguages.map { $0.languageCode },
+         "recognizedLanguages": recognizedLanguages.map {
+             $0.languageCode
+         },
          "boundingBox": frame.data,
-         "lines": lines.map { $0.data },
-         "corners": cornerPoints.map { $0.cgPointValue.data }]
+         "lines": lines.map {
+             $0.data
+         },
+         "corners": cornerPoints.map {
+             $0.cgPointValue.data
+         }]
     }
 }
 
 extension TextLine {
     var data: [String: Any?] {
         ["text": text,
-         "recognizedLanguages": recognizedLanguages.map { $0.languageCode },
-         "elements": elements.map { $0.data },
+         "recognizedLanguages": recognizedLanguages.map {
+             $0.languageCode
+         },
+         "elements": elements.map {
+             $0.data
+         },
          "boundingBox": frame.data,
-         "corners": cornerPoints.map { $0.cgPointValue.data }]
+         "corners": cornerPoints.map {
+             $0.cgPointValue.data
+         }]
     }
 }
 
@@ -167,7 +201,9 @@ extension TextElement {
     var data: [String: Any?] {
         ["text": text,
          "boundingBox": frame.data,
-         "corners": cornerPoints.map { $0.cgPointValue.data }]
+         "corners": cornerPoints.map {
+             $0.cgPointValue.data
+         }]
     }
 }
 

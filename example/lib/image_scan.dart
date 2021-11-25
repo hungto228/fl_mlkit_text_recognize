@@ -17,7 +17,9 @@ class ImageScanPage extends StatefulWidget {
 class _ImageScanPageState extends State<ImageScanPage> {
   String? path;
   AnalysisTextModel? model;
-  List<String> types = ['latin', 'chinese', 'japanese'];
+  List<String> types =
+      RecognizedLanguage.values.builder((item) => item.toString());
+
   int? selectIndex;
 
   @override
@@ -35,20 +37,8 @@ class _ImageScanPageState extends State<ImageScanPage> {
                   iconColor: Colors.white,
                   onChanged: (int index) {
                     selectIndex = index;
-                    late RecognizedLanguage recognizedLanguage;
-                    switch (index) {
-                      case 0:
-                        recognizedLanguage = RecognizedLanguage.latin;
-                        break;
-                      case 1:
-                        recognizedLanguage = RecognizedLanguage.chinese;
-                        break;
-                      case 2:
-                        recognizedLanguage = RecognizedLanguage.japanese;
-                        break;
-                    }
-                    FlMlKitTextRecognizeController()
-                        .setRecognizedLanguage(recognizedLanguage);
+                    FlMlKitTextRecognizeController().setRecognizedLanguage(
+                        RecognizedLanguage.values[selectIndex!]);
                   },
                   defaultBuilder: (int? index) => BText(index == null
                       ? 'Select Recognized Language'
@@ -66,10 +56,8 @@ class _ImageScanPageState extends State<ImageScanPage> {
             Container(
                 width: double.infinity,
                 height: 300,
-                margin:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
+                margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 40),
                 child: Image.file(File(path!))),
-          const SizedBox(height: 20),
           if (model == null) const ShowText('Unrecognized', 'Unrecognized'),
           ShowCode(model, expanded: false)
         ]);
@@ -107,5 +95,11 @@ class _ImageScanPageState extends State<ImageScanPage> {
       path = data;
       setState(() {});
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    FlMlKitTextRecognizeController().dispose();
   }
 }

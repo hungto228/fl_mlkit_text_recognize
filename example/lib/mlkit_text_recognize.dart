@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_waya/flutter_waya.dart';
 
 class FlMlKitTextRecognizePage extends StatefulWidget {
-  const FlMlKitTextRecognizePage(
-      {Key? key, this.recognizedLanguage = RecognizedLanguage.latin})
-      : super(key: key);
-  final RecognizedLanguage recognizedLanguage;
+  const FlMlKitTextRecognizePage({Key? key}) : super(key: key);
 
   @override
   _FlMlKitTextRecognizePageState createState() =>
@@ -16,6 +13,9 @@ class FlMlKitTextRecognizePage extends StatefulWidget {
 
 class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
     with TickerProviderStateMixin {
+  List<String> types =
+      RecognizedLanguage.values.builder((item) => item.toString());
+
   late AnimationController animationController;
   AnalysisTextModel? model;
   double ratio = 1;
@@ -55,7 +55,7 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
         },
         body: Stack(children: <Widget>[
           FlMlKitTextRecognize(
-              recognizedLanguage: widget.recognizedLanguage,
+              recognizedLanguage: RecognizedLanguage.latin,
               frequency: 1000,
               camera: currentCamera,
               onCreateView: (FlMlKitTextRecognizeController _controller) {
@@ -82,7 +82,6 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
                       style: TextStyle(color: Colors.blueAccent))),
               onDataChanged: (AnalysisTextModel data) {
                 if (data.text != null && data.text!.isNotEmpty) {
-                  showToast(data.text ?? 'Unknown');
                   model = data;
                   animationController.reset();
                 }
@@ -127,6 +126,28 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
                           })
                     ]);
               })),
+          Align(
+              alignment: Alignment.centerRight,
+              child: SizedBox(
+                  width: 150,
+                  height: 300,
+                  child: ListWheel(
+                      useMagnifier: true,
+                      magnification: 1.5,
+                      onChanged: (int index) {
+                        scanningController.value
+                            ?.setRecognizedLanguage(
+                                RecognizedLanguage.values[index])
+                            .then((value) {
+                          showToast('setRecognizedLanguage:$value');
+                        });
+                      },
+                      childDelegateType: ListWheelChildDelegateType.builder,
+                      itemBuilder: (_, int index) => Align(
+                          alignment: Alignment.center,
+                          child: BText(types[index].split('.')[1],
+                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      itemCount: types.length))),
           Positioned(
               right: 12,
               left: 12,

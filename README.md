@@ -117,3 +117,8 @@ void func() {
 }
 
 ```
+
+| --- | --- |
+| <img src="https://github.com/Wayaer/fl_mlkit_text_recognize/raw/main/res/image.jpg" width="50%"/> |  <img src="https://github.com/Wayaer/fl_mlkit_text_recognize/raw/main/res/scan.jpg" width="50%"/> |
+
+<img src="https://github.com/Wayaer/fl_mlkit_text_recognize/raw/main/res/test.png" width="50%"/>

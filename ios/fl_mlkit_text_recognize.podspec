@@ -18,7 +18,9 @@ Google mlkit text recognize plugin, supports Android and IOS.
   s.dependency 'fl_camera'
   s.dependency 'GoogleMLKit/TextRecognition'
   s.dependency 'GoogleMLKit/TextRecognitionChinese'
+  s.dependency 'GoogleMLKit/TextRecognitionDevanagari'
   s.dependency 'GoogleMLKit/TextRecognitionJapanese'
+  s.dependency 'GoogleMLKit/TextRecognitionKorean'
   s.static_framework = true
   s.platform = :ios, '11.0'
   s.ios.deployment_target = '11.0'

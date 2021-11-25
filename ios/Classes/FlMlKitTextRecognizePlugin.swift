@@ -1,15 +1,14 @@
-import fl_camera
 import Flutter
 import UIKit
 
-public class FlMlkitTextRecognizePlugin: NSObject, FlutterPlugin {
+public class FlMlKitTextRecognizePlugin: NSObject, FlutterPlugin {
     var channel: FlutterMethodChannel?
     var methodCall: FlMlKitTextRecognizeMethodCall?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "fl.mlkit.text.recognize",
-                                           binaryMessenger: registrar.messenger())
-        let instance = FlMlkitTextRecognizePlugin(registrar, channel)
+                binaryMessenger: registrar.messenger())
+        let instance = FlMlKitTextRecognizePlugin(registrar, channel)
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
 

@@ -1,6 +1,6 @@
 name: fl_mlkit_text_recognize
 description: Google mlkit text recognize plugin, supports Android and IOS.
-version: 1.0.0
+version: 1.1.0
 repository: https://github.com/Wayaer/fl_mlkit_text_recognize.git
 
 environment:
@@ -8,7 +8,7 @@ environment:
   flutter: '>=2.0.0'
 
 dependencies:
-  fl_camera: ^2.1.0
+  fl_camera: ^2.2.1
   flutter:
     sdk: flutter
 
@@ -22,4 +22,4 @@ flutter:
         package: fl.mlkit.text.recognize
         pluginClass: FlMlKitTextRecognizePlugin
       ios:
-        pluginClass: FlMlkitTextRecognizePlugin
+        pluginClass: FlMlKitTextRecognizePlugin
