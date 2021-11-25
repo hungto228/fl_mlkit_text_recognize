@@ -132,7 +132,7 @@ Rect? _getRect(Map<dynamic, dynamic>? data) {
       final double y = (data['y'] as double?) ?? 0;
       final double width = (data['width'] as double?) ?? 0;
       final double height = (data['height'] as double?) ?? 0;
-      return Rect.fromLTWH(x, y, width, height);
+      return Rect.fromPoints(Offset(x, y), Offset(x + width, y + height));
     }
   }
 }
