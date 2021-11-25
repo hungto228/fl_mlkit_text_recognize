@@ -96,8 +96,7 @@ class FlMlKitTextRecognizeMethodCall: FlCameraMethodCall {
         } else {
             visionImage.orientation = flCamera!.imageOrientation()
         }
-        let textRecognizer = getTextRecognition()
-        textRecognizer.process(visionImage) { [self] visionText, error in
+        getTextRecognition().process(visionImage) { [self] visionText, error in
             if error == nil, visionText != nil {
                 var map = visionText!.data
                 map.updateValue(image.size.height, forKey: "height")

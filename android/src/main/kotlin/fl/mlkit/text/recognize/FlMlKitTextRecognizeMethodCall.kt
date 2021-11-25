@@ -120,8 +120,7 @@ class FlMlKitTextRecognizeMethodCall(
         result: MethodChannel.Result?,
         imageProxy: ImageProxy?
     ) {
-        val recognizer = getTextRecognition()
-        recognizer.process(inputImage)
+        getTextRecognition().process(inputImage)
             .addOnSuccessListener { visionText ->
                 var width = inputImage.width
                 var height = inputImage.height
