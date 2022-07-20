@@ -1,5 +1,6 @@
 import 'package:example/main.dart';
 import 'package:fl_mlkit_text_recognize/fl_mlkit_text_recognize.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_waya/flutter_waya.dart';
 
@@ -7,7 +8,7 @@ class FlMlKitTextRecognizePage extends StatefulWidget {
   const FlMlKitTextRecognizePage({Key? key}) : super(key: key);
 
   @override
-  _FlMlKitTextRecognizePageState createState() =>
+  State<FlMlKitTextRecognizePage> createState() =>
       _FlMlKitTextRecognizePageState();
 }
 
@@ -18,16 +19,17 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
 
   late AnimationController animationController;
   AnalysisTextModel? model;
-  double ratio = 1;
-  double? maxRatio;
-  StateSetter? zoomState;
-  bool flashState = false;
-  ValueNotifier<FlMlKitTextRecognizeController?> scanningController =
+
+  ValueNotifier<bool> flashState = ValueNotifier<bool>(false);
+  double maxRatio = 10;
+  ValueNotifier<double> ratio = ValueNotifier<double>(1);
+
+  ValueNotifier<FlMlKitTextRecognizeController?> textRecognizeController =
       ValueNotifier<FlMlKitTextRecognizeController?>(null);
 
   ///  The first rendering is null ，Using the rear camera
   CameraInfo? currentCamera;
-  bool isBcakCamera = true;
+  bool isBackCamera = true;
 
   ValueNotifier<bool> hasPreview = ValueNotifier<bool>(false);
   ValueNotifier<bool> canScan = ValueNotifier<bool>(false);
@@ -39,11 +41,12 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
   }
 
   void listener() {
-    if (hasPreview.value != scanningController.value!.hasPreview) {
-      hasPreview.value = scanningController.value!.hasPreview;
+    if (!mounted) return;
+    if (hasPreview.value != textRecognizeController.value!.hasPreview) {
+      hasPreview.value = textRecognizeController.value!.hasPreview;
     }
-    if (canScan.value != scanningController.value!.canScan) {
-      canScan.value = scanningController.value!.canScan;
+    if (canScan.value != textRecognizeController.value!.canScan) {
+      canScan.value = textRecognizeController.value!.canScan;
     }
   }
 
@@ -58,19 +61,18 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
               recognizedLanguage: RecognizedLanguage.latin,
               frequency: 1000,
               camera: currentCamera,
-              onCreateView: (FlMlKitTextRecognizeController _controller) {
-                scanningController.value = _controller;
-                scanningController.value!.addListener(listener);
+              onCreateView: (FlMlKitTextRecognizeController controller) {
+                textRecognizeController.value = controller;
+                textRecognizeController.value!.addListener(listener);
               },
               onFlashChanged: (FlashState state) {
                 showToast('$state');
+                flashState.value = state == FlashState.on;
               },
               onZoomChanged: (CameraZoomState zoom) {
                 showToast('zoom ratio:${zoom.zoomRatio}');
-                if (maxRatio == null && zoomState != null) {
-                  maxRatio = zoom.maxZoomRatio;
-                  zoomState!(() {});
-                }
+                maxRatio = zoom.maxZoomRatio ?? 10;
+                ratio.value = zoom.zoomRatio ?? 1;
               },
               resolution: CameraResolution.veryHigh,
               autoScanning: true,
@@ -90,58 +92,27 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
               animation: animationController,
               builder: (_, __) =>
                   model != null ? _RectBox(model!) : const SizedBox()),
-          Align(
+          Universal(
               alignment: Alignment.bottomCenter,
-              child: StatefulBuilder(builder: (_, StateSetter state) {
-                zoomState = state;
-                return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Slider(
-                          value: ratio,
-                          min: 1,
-                          max: maxRatio ?? 20,
-                          onChanged: (double value) async {
-                            ratio = value;
-                            zoomState!(() {});
-                            scanningController.value?.setZoomRatio(value);
-                          }),
-                      IconBox(
-                          size: 30,
-                          color: flashState
-                              ? Colors.white
-                              : Colors.white.withOpacity(0.6),
-                          padding: const EdgeInsets.fromLTRB(10, 10, 10, 40),
-                          icon: flashState ? Icons.flash_on : Icons.flash_off,
-                          onTap: () async {
-                            final bool? state = await scanningController.value
-                                ?.setFlashMode(flashState
-                                    ? FlashState.off
-                                    : FlashState.on);
-                            flashState = !flashState;
-                            if (state == true) {
-                              flashState = !flashState;
-                              zoomState!(() {});
-                            }
-                          })
-                    ]);
-              })),
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[buildRatioSlider, buildFlashState]),
           Align(
               alignment: Alignment.centerRight,
               child: SizedBox(
                   width: 150,
                   height: 300,
                   child: ListWheel(
-                      useMagnifier: true,
-                      magnification: 1.5,
-                      onChanged: (int index) {
-                        scanningController.value
-                            ?.setRecognizedLanguage(
-                                RecognizedLanguage.values[index])
-                            .then((value) {
-                          showToast('setRecognizedLanguage:$value');
-                        });
-                      },
+                      options: WheelOptions(
+                          useMagnifier: true,
+                          magnification: 1.5,
+                          onChanged: (int index) {
+                            textRecognizeController.value
+                                ?.setRecognizedLanguage(
+                                    RecognizedLanguage.values[index])
+                                .then((value) {
+                              showToast('setRecognizedLanguage:$value');
+                            });
+                          }),
                       childDelegateType: ListWheelChildDelegateType.builder,
                       itemBuilder: (_, int index) => Align(
                           alignment: Alignment.center,
@@ -153,7 +124,7 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
               left: 12,
               top: getStatusBarHeight + 12,
               child: ValueListenableBuilder<FlMlKitTextRecognizeController?>(
-                  valueListenable: scanningController,
+                  valueListenable: textRecognizeController,
                   builder: (_, FlMlKitTextRecognizeController? controller, __) {
                     return controller == null
                         ? const SizedBox()
@@ -174,6 +145,38 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
                               ]);
                   })),
         ]));
+  }
+
+  Widget get buildFlashState {
+    return ValueListenableBuilder(
+        valueListenable: flashState,
+        builder: (_, bool state, __) {
+          return IconBox(
+              size: 30,
+              color: state ? Colors.white : Colors.white.withOpacity(0.6),
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 40),
+              icon: state ? Icons.flash_on : Icons.flash_off,
+              onTap: () {
+                textRecognizeController.value
+                    ?.setFlashMode(state ? FlashState.off : FlashState.on);
+              });
+        });
+  }
+
+  Widget get buildRatioSlider {
+    return ValueListenableBuilder(
+        valueListenable: ratio,
+        builder: (_, double ratio, __) {
+          return CupertinoSlider(
+              value: ratio.floorToDouble(),
+              min: 1,
+              max: maxRatio,
+              divisions: maxRatio.toInt(),
+              onChanged: (double value) {
+                textRecognizeController.value
+                    ?.setZoomRatio(value.floorToDouble());
+              });
+        });
   }
 
   Widget canScanButton(FlMlKitTextRecognizeController scanningController) {
@@ -197,40 +200,43 @@ class _FlMlKitTextRecognizePageState extends State<FlMlKitTextRecognizePage>
         valueListenable: hasPreview,
         builder: (_, bool hasPreview, __) {
           return ElevatedText(
-            text: !hasPreview ? 'start' : 'stop',
-            onPressed: () async {
-              if (!hasPreview) {
-                if (scanningController.previousCamera != null) {
-                  await scanningController
-                      .startPreview(scanningController.previousCamera!);
+              text: !hasPreview ? 'start' : 'stop',
+              onPressed: () async {
+                if (!hasPreview) {
+                  if (scanningController.previousCamera != null) {
+                    await scanningController
+                        .startPreview(scanningController.previousCamera!);
+                  }
+                } else {
+                  await scanningController.stopPreview();
                 }
-              } else {
-                await scanningController.stopPreview();
-              }
-            },
-          );
+              });
         });
   }
 
   Future<void> switchCamera() async {
-    if (scanningController.value == null) return;
-    for (final CameraInfo cameraInfo in scanningController.value!.cameras!) {
+    if (textRecognizeController.value == null) return;
+    for (final CameraInfo cameraInfo
+        in textRecognizeController.value!.cameras!) {
       if (cameraInfo.lensFacing ==
-          (isBcakCamera ? CameraLensFacing.front : CameraLensFacing.back)) {
+          (isBackCamera ? CameraLensFacing.front : CameraLensFacing.back)) {
         currentCamera = cameraInfo;
         break;
       }
     }
-    await scanningController.value!.switchCamera(currentCamera!);
-    isBcakCamera = !isBcakCamera;
+    await textRecognizeController.value!.switchCamera(currentCamera!);
+    isBackCamera = !isBackCamera;
   }
 
   @override
   void dispose() {
     super.dispose();
     animationController.dispose();
-    scanningController.dispose();
+    textRecognizeController.dispose();
     hasPreview.dispose();
+    canScan.dispose();
+    ratio.dispose();
+    flashState.dispose();
   }
 }
 

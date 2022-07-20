@@ -57,7 +57,7 @@ class FlMlKitTextRecognize extends StatefulWidget {
   /// Preview the resolution supported by the camera
   final CameraResolution resolution;
 
-  /// canera fit
+  /// How a camera box should be inscribed into another box.
   final BoxFit fit;
 
   /// 需要是别的语言类型
@@ -74,7 +74,8 @@ class FlMlKitTextRecognize extends StatefulWidget {
   final FlMlKitTextRecognizeCreateCallback? onCreateView;
 
   @override
-  _FlMlKitTextRecognizeState createState() => _FlMlKitTextRecognizeState();
+  FlCameraState<FlMlKitTextRecognize> createState() =>
+      _FlMlKitTextRecognizeState();
 }
 
 class _FlMlKitTextRecognizeState extends FlCameraState<FlMlKitTextRecognize> {
@@ -86,12 +87,12 @@ class _FlMlKitTextRecognizeState extends FlCameraState<FlMlKitTextRecognize> {
     controller = FlMlKitTextRecognizeController();
     super.initState();
     uninitialized = widget.uninitialized;
-    WidgetsBinding.instance!.addPostFrameCallback((Duration time) async {
-      await controller.initialize();
+    controller.addListener(changedListener);
+    WidgetsBinding.instance.addPostFrameCallback((Duration time) async {
+      await (controller as FlMlKitTextRecognizeController).initialize();
       widget.onCreateView?.call(controller as FlMlKitTextRecognizeController);
       initialize();
     });
-    controller.addListener(changedListener);
   }
 
   Future<void> initialize() async {
@@ -108,18 +109,15 @@ class _FlMlKitTextRecognizeState extends FlCameraState<FlMlKitTextRecognize> {
     }
     if (camera == null) return;
     var textController = controller as FlMlKitTextRecognizeController;
-    final data = await textController.initialize();
-    if (data) {
-      await textController.setRecognizedLanguage(widget.recognizedLanguage);
-      if (widget.onDataChanged != null) {
-        textController.onDataChanged = widget.onDataChanged;
-      }
-      final options = await textController.startPreview(camera,
-          resolution: widget.resolution, frequency: widget.frequency);
-      if (options != null && mounted) {
-        if (widget.autoScanning) textController.startScan();
-        setState(() {});
-      }
+    await textController.setRecognizedLanguage(widget.recognizedLanguage);
+    if (widget.onDataChanged != null) {
+      textController.onDataChanged = widget.onDataChanged;
+    }
+    final options = await textController.startPreview(camera,
+        resolution: widget.resolution, frequency: widget.frequency);
+    if (options != null && mounted) {
+      if (widget.autoScanning) textController.startScan();
+      setState(() {});
     }
   }
 

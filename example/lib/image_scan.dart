@@ -11,7 +11,7 @@ class ImageScanPage extends StatefulWidget {
   const ImageScanPage({Key? key}) : super(key: key);
 
   @override
-  _ImageScanPageState createState() => _ImageScanPageState();
+  State<ImageScanPage> createState() => _ImageScanPageState();
 }
 
 class _ImageScanPageState extends State<ImageScanPage> {
@@ -65,10 +65,12 @@ class _ImageScanPageState extends State<ImageScanPage> {
 
   Future<void> scanByte() async {
     if (path == null || path!.isEmpty) {
-      return showToast('Please select a picture');
+      showToast('Please select a picture');
+      return;
     }
     if (selectIndex == null) {
-      return showToast('Please select recognized language');
+      showToast('Please select recognized language');
+      return;
     }
     bool hasPermission = false;
     if (isAndroid) hasPermission = await getPermission(Permission.storage);

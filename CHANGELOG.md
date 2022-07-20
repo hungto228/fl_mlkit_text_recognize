@@ -1,3 +1,8 @@
+## 2.0.0
+
+* Compatible with flutter 3.0.0
+* Fix known problems and optimize some methods
+
 ## 1.1.0
 
 * Added `Korean` and `Devanagari` support
