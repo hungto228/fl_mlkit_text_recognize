@@ -24,10 +24,10 @@ class _AppState extends State<_App> {
         padding: const EdgeInsets.all(30),
         children: <Widget>[
           const SizedBox(height: 10),
-          ElevatedText(onPressed: scanImage, text: 'Image recognition'),
-          const SizedBox(height: 10),
           ElevatedText(
               onPressed: () => openCamera(), text: 'Camera recognition'),
+          const SizedBox(height: 10),
+          ElevatedText(onPressed: scanImage, text: 'Image recognition'),
           const SizedBox(height: 10),
         ]);
   }
